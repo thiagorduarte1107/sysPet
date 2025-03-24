@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - master
+      - master  # Ajuste para "main" se for o caso
 
 jobs:
   deploy:
@@ -11,24 +11,33 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Garante que o histórico completo do repositório seja obtido
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+          cache: 'npm'  # Habilita cache para acelerar a instalação de dependências
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci  # Usa npm ci para instalação consistente com package-lock.json
 
       - name: Install Angular CLI
-        run: npm install -g @angular/cli@12.2.18
+        run: npm install -g @angular/cli@12.2.18  # Versão fixa para compatibilidade
 
       - name: Build
-        run: npm run build:gh-pages
+        run: npm run build:gh-pages  # Executa o build com a configuração para GitHub Pages
+
+      - name: List generated files (debug)
+        run: ls -la ./docs  # Lista os arquivos gerados para depuração
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
-          force_orphan: true
+          publish_dir: ./docs  # Diretório com os arquivos gerados
+          force_orphan: true  # Garante que o branch gh-pages seja reescrito
+          user_name: 'github-actions[bot]'  # Define o autor do commit
+          user_email: 'github-actions[bot]@users.noreply.github.com'  # Email do autor
+          commit_message: 'Deploy to GitHub Pages'  # Mensagem do commit
